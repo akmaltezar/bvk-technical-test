@@ -13,14 +13,12 @@ import {CAT_API, API_KEY} from '@env';
 const App = () => {
   const [currentIndex, setCurrentIndex] = useState<any>(null);
   const [result, setResult] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getMeow();
   }, []);
 
   function getMeow() {
-    setIsLoading(true);
     var myHeaders = new Headers();
     myHeaders.append('x-api-key', `${API_KEY}`);
 
@@ -32,54 +30,48 @@ const App = () => {
 
     fetch(`${CAT_API}/images/search?limit=20&has_breeds=1`, requestOptions)
       .then(response => response.json())
-      .then(result => {
-        setIsLoading(false);
-        console.log(result);
-        setResult(result);
+      .then(respon => {
+        // console.log(respon);
+        setResult([...result, ...respon]);
       })
       .catch(error => console.log('error', error));
   }
   return (
     <SafeAreaView>
-      {isLoading ? (
-        <Text>Loading...</Text>
-      ) : (
-        <FlatList
-          data={result}
-          onEndReached={() => getMeow()}
-          renderItem={({item, index}) => (
-            <TouchableOpacity
-              style={styles.articleContainer}
-              key={index}
-              onPress={() => {
-                setCurrentIndex(index === currentIndex ? null : index);
-              }}>
-              <Image
-                source={{uri: item.url}}
-                style={index === currentIndex ? styles.fullSize : styles.catImg}
-              />
+      <FlatList
+        data={result}
+        onEndReached={() => getMeow()}
+        renderItem={({item, index}) => (
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.articleContainer}
+            key={index}
+            onPress={() => {
+              setCurrentIndex(index === currentIndex ? null : index);
+            }}>
+            <Image
+              source={{uri: item.url}}
+              style={index === currentIndex ? styles.fullSize : styles.catImg}
+            />
 
-              {index === currentIndex && (
-                <View>
-                  {item.breeds.map((item: any) => {
-                    return (
-                      <>
-                        <View style={styles.flexWrapper} key={index}>
-                          <Text style={styles.text}>Breed : {item.name}</Text>
-                          <Text style={styles.text}>
-                            Origin : {item.origin}
-                          </Text>
-                        </View>
-                        <Text style={styles.text}> {item.description} </Text>
-                      </>
-                    );
-                  })}
-                </View>
-              )}
-            </TouchableOpacity>
-          )}
-        />
-      )}
+            {index === currentIndex && (
+              <View>
+                {item.breeds.map((item: any) => {
+                  return (
+                    <>
+                      <View style={styles.flexWrapper} key={index}>
+                        <Text style={styles.text}>Breed : {item.name}</Text>
+                        <Text style={styles.text}>Origin : {item.origin}</Text>
+                      </View>
+                      <Text style={styles.text}> {item.description} </Text>
+                    </>
+                  );
+                })}
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+      />
     </SafeAreaView>
   );
 };
